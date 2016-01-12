@@ -293,12 +293,12 @@ namespace string_utils {
         std::wstring temp = utf8_to_unicode(str);
 #ifdef _WINDOWS
 #else
-        setlocale(LC_ALL, "zh_CN.GBK")
+        setlocale(LC_ALL, "zh_CN.GBK");
 #endif
         std::string dest = unicode_to_ansi(temp);
 #ifdef _WINDOWS
 #else
-        setlocale(LC_ALL, "")
+        setlocale(LC_ALL, "");
 #endif
         return dest;
     }
@@ -307,12 +307,12 @@ namespace string_utils {
     {
 #ifdef _WINDOWS
 #else
-        setlocale(LC_ALL, "zh_CN.GBK")
+        setlocale(LC_ALL, "zh_CN.GBK");
 #endif
         std::wstring temp = ansi_to_unicode(str);
 #ifdef _WINDOWS
 #else
-        setlocale(LC_ALL, "")
+        setlocale(LC_ALL, "");
 #endif
         std::string dest = unicode_to_utf8(temp);
         return dest;
