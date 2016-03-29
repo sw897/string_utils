@@ -16,11 +16,12 @@
 #include <iomanip>
 #include <vector>
 
-namespace string_utils {
 
-    template <typename Str> struct tokenizer;
+template <typename Str> struct tokenizer;
 
-    template <typename Str>
+template <typename Str>
+struct string_util
+{
     static Str to_upper(const Str& str)
     {
         Str temp(str);
@@ -28,7 +29,6 @@ namespace string_utils {
         return temp;
     }
 
-    template <typename Str>
     static Str to_lower(const Str& str)
     {
         Str temp(str);
@@ -36,7 +36,6 @@ namespace string_utils {
         return temp;
     }
 
-    template <typename Str>
     static Str trim_left(const Str& str)
     {
         Str temp(str);
@@ -52,7 +51,6 @@ namespace string_utils {
         }
     }
 
-    template <typename Str>
     static Str trim_right(const Str& str)
     {
         Str temp(str);
@@ -69,34 +67,30 @@ namespace string_utils {
         return temp;
     }
 
-    template <typename Str>
     static Str trim(const Str& str)
     {
         Str temp = trim_left(str);
         return trim_right(temp);
     }
 
-    template <typename Str>
     static bool starts_with(Str const & value, Str const & starting)
     {
         if (starting.size() > value.size()) return false;
         return std::equal(starting.begin(), starting.end(), value.begin());
     }
 
-    template <typename Str>
     static bool ends_with(Str const & value, Str const & ending)
     {
         if (ending.size() > value.size()) return false;
         return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
     }
 
-    template <typename Str>
     static bool equals_ignore_case(const Str& str1, const Str& str2)
     {
         return to_lower(str1) == to_lower(str2);
     }
 
-    template <typename T, typename Str>
+    template <typename T>
     static T from_string(const Str& str)
     {
         T obj;
@@ -105,7 +99,6 @@ namespace string_utils {
         return obj;
     }
 
-    template <typename Str>
     static bool from_string(const Str& str)
     {
         bool obj;
@@ -114,7 +107,7 @@ namespace string_utils {
         return obj;
     }
 
-    template <typename T, typename Str>
+    template <typename T>
     static T from_hex_string(const Str& str)
     {
         T obj;
@@ -123,7 +116,7 @@ namespace string_utils {
         return obj;
     }
 
-    template <typename Str, typename T>
+    template <typename T>
     static Str to_string(const T& var)
     {
         std::basic_ostringstream<typename Str::value_type> temp;
@@ -131,15 +124,14 @@ namespace string_utils {
         return temp.str();
     }
 
-    template <typename Str>
-    static Str to_string(bool var)
+    static Str to_string(const bool& var)
     {
         std::basic_ostringstream<typename Str::value_type> temp;
         temp << std::boolalpha << var;
         return temp.str();
     }
 
-    template <typename Str, typename T>
+    template <typename T>
     static Str to_hex_string(const T& var, int width)
     {
         std::basic_ostringstream<typename Str::value_type> temp;
@@ -152,7 +144,6 @@ namespace string_utils {
         return temp.str();
     }
 
-    template <typename Str>
     static std::vector<Str> split(Str const& str, Str const& delimiters)
     {
         std::vector<Str> ss;
@@ -163,7 +154,10 @@ namespace string_utils {
         }
         return ss;
     }
+};
 
+struct string_convert
+{
     static std::wstring utf8_to_unicode(std::string const& str)
     {
         size_t source_len = str.length();
@@ -638,57 +632,62 @@ namespace string_utils {
         return result;
     }
 
-    template <typename Str>
-    struct tokenizer
-    {
-        tokenizer(Str const& str)
-            : _string(str), _offset(0), _delimiters(" ")
-        {}
-        tokenizer(Str const& str, Str const& delimiters)
-            : _string(str), _offset(0), _delimiters(delimiters)
-        {}
+};
 
-        bool next_token()
+template <typename Str>
+struct tokenizer
+{
+    tokenizer(Str const& str)
+        : _string(str), _offset(0), _delimiters(" ")
+    {}
+    tokenizer(Str const& str, Str const& delimiters)
+        : _string(str), _offset(0), _delimiters(delimiters)
+    {}
+
+    bool next_token()
+    {
+        return next_token(_delimiters);
+    }
+
+    bool next_token(Str const& delimiters)
+    {
+        size_t i = _string.find_first_not_of(delimiters, _offset);
+        if (i == Str::npos)
         {
-            return next_token(_delimiters);
+            _offset = _string.length();
+            return false;
         }
 
-        bool next_token(Str const& delimiters)
-        {
-            size_t i = _string.find_first_not_of(delimiters, _offset);
-            if (i == Str::npos)
-            {
-                _offset = _string.length();
-                return false;
-            }
-
-            size_t j = _string.find_first_of(delimiters, i);
-            if (j == Str::npos) {
-                _token = _string.substr(i);
-                _offset = _string.length();
-                return true;
-            }
-
-            _token = _string.substr(i, j - i);
-            _offset = j;
+        size_t j = _string.find_first_of(delimiters, i);
+        if (j == Str::npos) {
+            _token = _string.substr(i);
+            _offset = _string.length();
             return true;
         }
 
-        const Str get_token() const
-        {
-            return _token;
-        }
+        _token = _string.substr(i, j - i);
+        _offset = j;
+        return true;
+    }
 
-        void reset()
-        {
-            _offset = 0;
-        }
+    const Str get_token() const
+    {
+        return _token;
+    }
 
-        size_t _offset;
-        const Str _string;
-        Str _token;
-        Str _delimiters;
-    };
-}
+    void reset()
+    {
+        _offset = 0;
+    }
+
+    size_t _offset;
+    const Str _string;
+    Str _token;
+    Str _delimiters;
+};
+
+
+typedef string_util<std::string> string_util_a;
+typedef string_util<std::wstring> string_util_w;
 
 #endif // UTIL_STRING_UTILS_HPP
