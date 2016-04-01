@@ -7,10 +7,6 @@
 #include <iomanip>
 #include <vector>
 
-#ifdef _WINDOWS
-  #include <windows.h>
-#endif
-
 template <typename Str>
 struct tokenizer
 {
